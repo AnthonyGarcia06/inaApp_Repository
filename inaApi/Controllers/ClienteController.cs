@@ -2,6 +2,7 @@
 using inaApp.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using inaApp.Entities;
 
 namespace inaApp.Api.Controllers
 {
@@ -12,9 +13,9 @@ namespace inaApp.Api.Controllers
     {
 
         //inyeccion de dependencia
-        private readonly IClienteService _clienteService;
+        private readonly IGenericService<Cliente> _clienteService;
 
-        public ClienteController(IClienteService clienteServ)
+        public ClienteController(IGenericService<Cliente> clienteServ)
         {
             _clienteService = clienteServ;
         }

@@ -1,16 +1,16 @@
 using inaApp.Common.interfaces;
 using inaApp.Services;
 using inaApp.Repository;
+using inaApp.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 //inyecciones de dependencias 
-builder.Services.AddScoped<IProductoService, ProductoService>();
-builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
-builder.Services.AddScoped<IClienteService, ClienteService>();
-builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+//registro contenedor de inyecciones de dependencias 
+builder.Services.AddAplicationServices(builder.Configuration);
+
 
 builder.Services.AddControllers();
 

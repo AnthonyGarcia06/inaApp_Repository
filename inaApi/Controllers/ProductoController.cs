@@ -1,4 +1,5 @@
 ﻿using inaApp.Common.interfaces;
+using inaApp.Entities;
 using inaApp.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,10 @@ namespace inaApp.Api.Controllers
     {
 
         //inyeccion de dependencia
-        private readonly IProductoService _productoService;
+        private readonly IGenericService<Producto> _productoService;
         
 
-        public ProductoController(IProductoService productoServ)
+        public ProductoController(IGenericService<Producto> productoServ)
         {
             _productoService = productoServ;
             
@@ -23,11 +24,47 @@ namespace inaApp.Api.Controllers
         // GET: ProductoController
 
         [HttpGet]
-        public ActionResult Index()
+        public async Task<ActionResult> IndexAsync()
         {
-            _productoService.obtenerTodosAsync();
+            
+            try
+            {
+                var lista = await _productoService.obtenerTodosAsync();
 
-            return Ok("correcto prueba");
+                if (lista.Count == 0)
+                {
+                    return NotFound("No hay datos");
+                }
+
+                return Ok(lista);
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(500, "Error de servidor,contacte con el servidor");
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult> ByIdAsync(int id)
+        {
+
+            try
+            {
+                var result = await _productoService.obtenerPorIdAsync(id);
+
+                if (result == null)
+                {
+                    return NotFound("Producto no encontrado");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, "Error de servidor,contacte con el servidor");
+            }
         }
 
         // GET: ProductoController/Details/5
@@ -36,67 +73,97 @@ namespace inaApp.Api.Controllers
             return View();
         }
 
-        // GET: ProductoController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+        //// GET: ProductoController/Create
+        //public ActionResult Create()
+        //{
+
+
+
+        //    return View();
+        //}
 
         // POST: ProductoController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create([FromBody] Producto producto)
         {
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                var result = await _productoService.CrearAsync(producto);
+
+                return Created("producto creado",result);
             }
-            catch
+            catch (Exception)
             {
-                return View();
+
+                return  StatusCode(500, "Error de servidor,contacte con el servidor");
             }
         }
 
-        // GET: ProductoController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+        //// GET: ProductoController/Edit/5
+        //public ActionResult Edit(int id)
+        //{
+        //    return View();
+        //}
 
-        // POST: ProductoController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        //// POST: ProductoController/Edit/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Edit(int id, IFormCollection collection)
+        //{
+        //    try
+        //    {
+        //        return RedirectToAction(nameof(IndexAsync));
+        //    }
+        //    catch
+        //    {
+        //        return View();
+        //    }
+        //}
 
         // GET: ProductoController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
 
-        // POST: ProductoController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteAsync(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                if (id <= 0)
+                    return BadRequest("Error al eliminar, id invalido");
+
+                var result = await _productoService.EliminarAsync(id);
+
+                return result ? Ok("Producto eliminado") : BadRequest("Error al eliminar el producto");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+
+                return StatusCode (500,"Error de servidor,contacte con el servidor");
+            }
+
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> EditAsync(int id, [FromBody] Producto producto)
+        {
+            try
+            {
+                if (id <= 0)
+                    return BadRequest("Error,id inválido");
+
+                if (id != producto.Id)
+                    return BadRequest("El id no coincide con el producto enviado");
+
+                var result = await _productoService.ActualizarAsync(producto);
+
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Error de servidor, contacte con el administrador");
             }
         }
+
+
     }
 }

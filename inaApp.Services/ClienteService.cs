@@ -9,22 +9,22 @@ using inaApp.Repository;
 
 namespace inaApp.Services
 {
-    public class ClienteService : IClienteService
+    public class ClienteService : IGenericService<Cliente>
     {
 
         //inyeccion de dependencia que viene del repo
-        private readonly IClienteRepository _clienteRepo;
-        public ClienteService(IClienteRepository clienteRepo)
+        private readonly IGenericRepository<Cliente> _clienteRepo;
+        public ClienteService(IGenericRepository<Cliente> clienteRepo)
         {
             _clienteRepo = clienteRepo;
         }
 
-        public Task<Cliente> ActualizarAsync(Cliente cliente)
+        public Task<Cliente> ActualizarAsync(Cliente entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Cliente> CrearAsync(Cliente cliente)
+        public Task<Cliente> CrearAsync(Cliente entity)
         {
             throw new NotImplementedException();
         }

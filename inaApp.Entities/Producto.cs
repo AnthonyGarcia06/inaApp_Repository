@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,16 +14,21 @@ namespace inaApp.Entities
     //internal: solo pueden acceder clases dentro del mismo proyecto
     //protected: solo clases dentro del mismo proyecto o heredadas
 {
+
+    [Table(name:"tbProducto")]
     public class Producto
     {
         //propiedades : variables que describen un objeto
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        public string Nombre { get; set; }
 
-        private int Id { get; }
-        private string Nombre { get; set; }
-        private decimal Precio { get; set; }
-        private int Stock { get; set; }
-        private string Descripcion { get; set; }
-        private string Estado { get; set; }
+        [Column(TypeName ="decimal(18,2)")]
+        public decimal Precio { get; set; }
+        public int Stock { get; set; }
+        public string Descripcion { get; set; }
+        public bool Estado { get; set; }
 
     }
 }
