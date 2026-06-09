@@ -1,7 +1,9 @@
-﻿using inaApp.Common.interfaces;
+﻿using inaApp.Common.Exceptions;
+using inaApp.Common.interfaces;
 using inaApp.Entities;
 using inaApp.Repository;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace inaApp.Api.Controllers
@@ -51,18 +53,20 @@ namespace inaApp.Api.Controllers
 
             try
             {
-                var result = await _productoService.obtenerPorIdAsync(id);
+                var producto = await _productoService.obtenerPorIdAsync(id);
 
-                if (result == null)
-                {
-                    return NotFound("Producto no encontrado");
-                }
+                //if (result == null)
+                //{
+                //    return NotFound("Producto no encontrado");
+                //}
 
-                return Ok(result);
+                return Ok(producto);
             }
-            catch (Exception ex)
+            catch (NotFoundException ex)//aqui usammos la exepcion personalizada
             {
-
+                return NotFound(ex.Message);
+            }
+            catch { 
                 return StatusCode(500, "Error de servidor,contacte con el servidor");
             }
         }
@@ -86,17 +90,28 @@ namespace inaApp.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] Producto producto)
         {
-
             try
             {
                 var result = await _productoService.CrearAsync(producto);
 
-                return Created("producto creado",result);
+                return Created("producto creado", result);
+            }
+            catch (InvalidPriceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (invalidStockException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DuplicateNameException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {
-
-                return  StatusCode(500, "Error de servidor,contacte con el servidor");
+                return StatusCode(500,
+                    "Error de servidor, contacte con el administrador");
             }
         }
 
@@ -143,24 +158,32 @@ namespace inaApp.Api.Controllers
 
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> EditAsync(int id, [FromBody] Producto producto)
+        [HttpPut]
+        public async Task<ActionResult> EditAsync([FromBody] Producto producto)
         {
             try
             {
-                if (id <= 0)
-                    return BadRequest("Error,id inválido");
-
-                if (id != producto.Id)
-                    return BadRequest("El id no coincide con el producto enviado");
-
+                producto.Estado = true;
                 var result = await _productoService.ActualizarAsync(producto);
 
-                return Ok(result);
+                return Created("producto editado", result);
+            }
+            catch (InvalidPriceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (invalidStockException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DuplicateNameException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Error de servidor, contacte con el administrador");
+                return StatusCode(500,
+                    "Error de servidor, contacte con el administrador");
             }
         }
 

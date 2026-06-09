@@ -76,12 +76,12 @@ namespace inaApp.Repository
         {
             try
             {
-                var entity= await _context.Producto.Where(x => x.Id == id && x.Estado == true).SingleOrDefaultAsync();
+                return await _context.Producto.Where(x => x.Id == id && x.Estado == true).SingleOrDefaultAsync();
 
-                if (entity is null)            
-                    throw new Exception("No se encontro la entidad");
+                //if (entity is null)            
+                //    throw new Exception("No se encontro la entidad");
 
-                return entity;
+                //return entity;
                 
             }
             catch (Exception ex)
@@ -91,11 +91,12 @@ namespace inaApp.Repository
             }
         }
 
+
         public async Task<List<Producto>> obtenerTodosAsync()
         {
             try
             {
-                return await _context.Producto.Where(x=> x.Estado==true).ToListAsync();
+                return await _context.Producto.AsNoTracking().Where(x=> x.Estado==true).ToListAsync();
             }
             catch (Exception ex)
             {

@@ -11,6 +11,7 @@ namespace inaApp.Common.interfaces
         Task<List<E>> obtenerTodosAsync();
 
         Task<E> obtenerPorIdAsync(int id);
+
         Task<E> CrearAsync(E entity);
 
         Task<E> ActualizarAsync(E entity);

@@ -30,6 +30,7 @@ namespace inaApp.Repository
             throw new NotImplementedException();
         }
 
+
         public Task<List<Cliente>> obtenerTodosAsync()
         {
             throw new NotImplementedException();
