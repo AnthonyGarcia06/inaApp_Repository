@@ -1,9 +1,12 @@
 ﻿using inaApp.Common.interfaces;
 using inaApp.Data;
+using inaApp.DTOs.Producto;
+using inaApp.DTOs.Cliente;
 using inaApp.Entities;
 using inaApp.Repository;
 using inaApp.Services;
 using Microsoft.EntityFrameworkCore;
+using inaApp.Services.Mapping;
 
 namespace inaApp.Api.Extensions
 {
@@ -18,9 +21,13 @@ namespace inaApp.Api.Extensions
                     configuration.GetConnectionString("DefaultConnection"));
             });
 
+            //Profile auto mapper 
+            //services.AddAutoMapper(typeof(MappingProfile));
+            services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
+
             //inyecciones de dependencia de servicios
-            services.AddScoped<IGenericService<Producto>, ProductoService>();
-            services.AddScoped<IGenericService<Cliente>, ClienteService>();
+            services.AddScoped<IGenericService<ProductoResponseDTO, ProductoCreateDTO, ProductoUpdateDTO>, ProductoService>();
+            services.AddScoped<IGenericService<ClienteResponseDTO, ClienteCreateDTO, ClienteUpdateDTO>, ClienteService>();
 
             //inyecciones de  dependencia de repositorios
             services.AddScoped<IGenericRepository<Producto>, ProductoRepository>();

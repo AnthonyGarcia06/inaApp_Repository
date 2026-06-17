@@ -76,13 +76,13 @@ namespace inaApp.Repository
         {
             try
             {
-                return await _context.Producto.Where(x => x.Id == id && x.Estado == true).SingleOrDefaultAsync();
+                return await _context.Producto.Include(p => p.Categoria).Where(x => x.Id == id && x.Estado == true).SingleOrDefaultAsync();//aqui meti lo de include para que salgan las cosas de categoria
 
                 //if (entity is null)            
                 //    throw new Exception("No se encontro la entidad");
 
                 //return entity;
-                
+
             }
             catch (Exception ex)
             {
@@ -96,7 +96,7 @@ namespace inaApp.Repository
         {
             try
             {
-                return await _context.Producto.AsNoTracking().Where(x=> x.Estado==true).ToListAsync();
+                return await _context.Producto.Include(p => p.Categoria).AsNoTracking().Where(x=> x.Estado==true).ToListAsync();//aqui meti lo de include para que salgan las cosas de categoria
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 ﻿using inaApp.Common.Exceptions;
 using inaApp.Common.interfaces;
+using inaApp.DTOs.Producto;
 using inaApp.Entities;
 using inaApp.Repository;
 using Microsoft.AspNetCore.Http;
@@ -14,10 +15,10 @@ namespace inaApp.Api.Controllers
     {
 
         //inyeccion de dependencia
-        private readonly IGenericService<Producto> _productoService;
+        private readonly IGenericService<ProductoResponseDTO,ProductoCreateDTO,ProductoUpdateDTO> _productoService;
         
 
-        public ProductoController(IGenericService<Producto> productoServ)
+        public ProductoController(IGenericService<ProductoResponseDTO, ProductoCreateDTO, ProductoUpdateDTO> productoServ)
         {
             _productoService = productoServ;
             
@@ -28,17 +29,16 @@ namespace inaApp.Api.Controllers
         [HttpGet]
         public async Task<ActionResult> IndexAsync()
         {
-            
+
             try
             {
-                var lista = await _productoService.obtenerTodosAsync();
+                var response = await _productoService.ObtenerTodosAsync();
 
-                if (lista.Count == 0)
-                {
-                    return NotFound("No hay datos");
-                }
-
-                return Ok(lista);
+                return Ok(response);
+            }
+            catch (NotFoundException ex) 
+            { 
+                return NotFound(ex.Message);
             }
             catch (Exception)
             {
@@ -53,7 +53,7 @@ namespace inaApp.Api.Controllers
 
             try
             {
-                var producto = await _productoService.obtenerPorIdAsync(id);
+                var producto = await _productoService.ObtenerPorIdAsync(id);
 
                 //if (result == null)
                 //{
@@ -88,13 +88,20 @@ namespace inaApp.Api.Controllers
 
         // POST: ProductoController/Create
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] Producto producto)
+        public async Task<ActionResult> Create([FromBody] ProductoCreateDTO productoDTO)
         {
             try
             {
-                var result = await _productoService.CrearAsync(producto);
 
-                return Created("producto creado", result);
+              //  productoDTO.Estado = true;
+
+                //Validar los datos de entrada
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var response = await _productoService.CrearAsync(productoDTO);
+
+                return Created("producto creado", response);
             }
             catch (InvalidPriceException ex)
             {
@@ -146,9 +153,9 @@ namespace inaApp.Api.Controllers
                 if (id <= 0)
                     return BadRequest("Error al eliminar, id invalido");
 
-                var result = await _productoService.EliminarAsync(id);
+                var response = await _productoService.EliminarAsync(id);
 
-                return result ? Ok("Producto eliminado") : BadRequest("Error al eliminar el producto");
+                return response.Data ? Ok(response) : BadRequest(response);
             }
             catch (Exception ex)
             {
@@ -159,14 +166,17 @@ namespace inaApp.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> EditAsync([FromBody] Producto producto)
+        public async Task<ActionResult> EditAsync([FromBody] ProductoUpdateDTO producto)
         {
             try
             {
-                producto.Estado = true;
-                var result = await _productoService.ActualizarAsync(producto);
 
-                return Created("producto editado", result);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+                // producto.Estado = true;
+                var response = await _productoService.ActualizarAsync(producto);
+
+                return Created("producto editado", response);
             }
             catch (InvalidPriceException ex)
             {
