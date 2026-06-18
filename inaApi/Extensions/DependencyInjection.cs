@@ -2,6 +2,7 @@
 using inaApp.Data;
 using inaApp.DTOs.Producto;
 using inaApp.DTOs.Cliente;
+using inaApp.DTOs.Categoria;
 using inaApp.Entities;
 using inaApp.Repository;
 using inaApp.Services;
@@ -28,10 +29,11 @@ namespace inaApp.Api.Extensions
             //inyecciones de dependencia de servicios
             services.AddScoped<IGenericService<ProductoResponseDTO, ProductoCreateDTO, ProductoUpdateDTO>, ProductoService>();
             services.AddScoped<IGenericService<ClienteResponseDTO, ClienteCreateDTO, ClienteUpdateDTO>, ClienteService>();
-
+            services.AddScoped<IGenericService<CategoriaResponseDTO, CategoriaCreateDTO, CategoriaUpdateDTO>, CategoriaService>();
             //inyecciones de  dependencia de repositorios
             services.AddScoped<IGenericRepository<Producto>, ProductoRepository>();
             services.AddScoped<IGenericRepository<Cliente>, ClienteRepository>();
+            services.AddScoped<IGenericRepository<Categoria>, CategoriaRepository>();
 
             return services;
         }

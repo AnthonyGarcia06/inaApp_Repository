@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\inaApp.Common\inaApp.Common.csproj" />
+    <ProjectReference Include="..\inaApp.Entities\inaApp.Entities.csproj" />
   </ItemGroup>
 
 </Project>

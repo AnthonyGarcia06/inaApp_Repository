@@ -176,7 +176,7 @@ namespace inaApp.Api.Controllers
                 // producto.Estado = true;
                 var response = await _productoService.ActualizarAsync(producto);
 
-                return Created("producto editado", response);
+                return Ok(response);
             }
             catch (InvalidPriceException ex)
             {

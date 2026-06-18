@@ -16,52 +16,55 @@ namespace inaApp.Services
     {
 
         private readonly IGenericRepository<Producto> _productoRepo;
+        private readonly IGenericRepository<Categoria> _categoriaRepo;
         private readonly IMapper _mapper;
-        public ProductoService(IGenericRepository<Producto> productoRepo,IMapper mapper)
+        public ProductoService(IGenericRepository<Producto> productoRepo, IGenericRepository<Categoria> categoriaRepo, IMapper mapper)
         {
             _productoRepo = productoRepo;
             _mapper = mapper;
+            _categoriaRepo = categoriaRepo;
         }
 
         public async Task<Response<ProductoResponseDTO>> ActualizarAsync(ProductoUpdateDTO entity)
         {
 
-            // reglas de negocio
-            //precio sea mayor a 0 - InvalidPriceException
-            //Nombre repetido - DuplicateProductNameException
-            //Stock negativo o 0 --invalidStockException
+            //Reglas de negocio para actualizar un producto
 
+            // Validar que el producto exista
+            var producto = await _productoRepo.obtenerPorIdAsync(entity.Id);
+            if (producto == null)
+                throw new NotFoundException($"El producto con el ID {entity.Id} no existe.");
+
+            // Validar que el precio sea mayor a 0
             if (entity.Precio <= 0)
-            {
-                throw new InvalidPriceException("El precio debe ser mayor a 0");
-            }
+                throw new InvalidPriceException("El precio debe ser mayor a 0.");
 
+            // Validar que el stock sea mayor a 0
             if (entity.Stock <= 0)
-            {
-                throw new invalidStockException("El stock debe ser mayor a 0");
-            }
+                throw new invalidStockException("El stock debe ser mayor a 0.");
 
-            //Validar que la categoria exista, si no existe lanzar una excepcion personalizada NotFoundException con el mensaje "La categoría con el id {id} no existe"
-            //var categoria = await _productoRepo.obtenerPorIdAsync(entity.CategoriaId);
-            //if (categoria == null)
-            //{
-            //    throw new NotFoundException($"La categoría con el id {entity.CategoriaId} no existe");
-            //}
-
+            // Validar que el nombre del producto no se repita
             var productos = await _productoRepo.obtenerTodosAsync();
             if (productos.Any(p => p.Nombre.ToLower() == entity.Nombre.ToLower() && p.Id != entity.Id))
-            {
-                throw new DuplicateNameException($"El nombre {entity.Nombre} ya existe");
-            }
+                throw new DuplicateNameException($"El nombre {entity.Nombre} ya existe.");
 
-            var producto= _mapper.Map<Producto>(entity);
+            // Validar que la categoría exista
+            var categoria = await _categoriaRepo.obtenerPorIdAsync(entity.CategoriaId);
+            if (categoria == null)
+                throw new NotFoundException($"La categoría con el ID {entity.CategoriaId} no existe.");
+
+            // Validar que la categoría esté activa
+            if (!categoria.Estado)
+                throw new InvalidOperationException($"La categoría con el ID {entity.CategoriaId} está inactiva.");
+
+            // Mapear los cambios del DTO a la entidad existente
+            _mapper.Map(entity, producto);
+            producto.Estado = true;
+
+            // Actualizar el producto en la base de datos
             producto = await _productoRepo.ActualizarAsync(producto);
 
-            //var productoResponse= _mapper.Map<ProductoResponseDTO>(producto);
-
-            //return productoResponse;
-
-            // Cargar la categoría asociada para que salga la categoría en el response, esto es porque el producto que retorna el repo no tiene cargada la categoria
+            // Cargar la categoría asociada para que salga en el response
             producto = await _productoRepo.obtenerPorIdAsync(producto.Id);
 
             return new Response<ProductoResponseDTO>
@@ -88,13 +91,6 @@ namespace inaApp.Services
             {
                 throw new invalidStockException("El stock debe ser mayor a 0");
             }
-
-            ////Misma validacion que en el de actualizar para validar que la categoria exista, si no existe lanzar una excepcion personalizada NotFoundException con el mensaje "La categoría con el id {id} no existe"
-            //var categoria = await _productoRepo.obtenerPorIdAsync(entity.CategoriaId);
-            //if (categoria == null)
-            //{
-            //    throw new NotFoundException($"La categoría con el id {entity.CategoriaId} no existe");
-            //}
 
             var productos = await _productoRepo.obtenerTodosAsync();
             if (productos.Any(p => p.Nombre.ToLower() == entity.Nombre.ToLower()))
@@ -153,7 +149,7 @@ namespace inaApp.Services
             return new Response<bool>
             {
                 Data =  await _productoRepo.EliminarAsync(id),
-                Message = "Producto obtenidos exitosamente",
+                Message = "Producto eliminado exitosamente",
                 Success = true
             };
 
